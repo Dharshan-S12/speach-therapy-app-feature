@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reading Passage Trainer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f8f8f8;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 60%;
+            margin: auto;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+        }
+
+        #feedback {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Reading Passage Trainer</h1>
+        <p id="passage">Click "Next Passage" to start.</p>
+        <button id="start-btn">Start Reading</button>
+        <button id="next-btn">Next Passage</button>
+        <p id="feedback"></p>
+    </div>
+    
+    <script>
+        const passages = [
+            "The sun rises in the east and sets in the west.",
+            "A quick brown fox jumps over the lazy dog.",
+            "Technology is advancing at a rapid pace.",
+            "Reading helps improve vocabulary and comprehension.",
+            "Space exploration has led to numerous scientific discoveries."
+        ];
+
+        let currentPassage = 0;
+        document.getElementById("next-btn").addEventListener("click", () => {
+            currentPassage = (currentPassage + 1) % passages.length;
+            document.getElementById("passage").textContent = passages[currentPassage];
+        });
+
+        document.getElementById("start-btn").addEventListener("click", startReading);
+
+        function startReading() {
+            const passageText = passages[currentPassage];
+
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = "en-US";
+            recognition.continuous = false;
+            recognition.interimResults = false;
+
+            recognition.onresult = (event) => {
+                const spokenText = event.results[0][0].transcript;
+                document.getElementById("feedback").textContent = compareText(spokenText, passageText);
+            };
+
+            recognition.onerror = (event) => {
+                document.getElementById("feedback").textContent = "Error: " + event.error;
+            };
+
+            recognition.start();
+        }
+
+        function compareText(spoken, original) {
+            let spokenWords = spoken.split(" ");
+            let originalWords = original.split(" ");
+            let correctWords = spokenWords.filter(word => originalWords.includes(word)).length;
+
+            let accuracy = (correctWords / originalWords.length) * 100;
+            return `Accuracy: ${accuracy.toFixed(2)}%`;
+        }
+    </script>
+</body>
+</html>
