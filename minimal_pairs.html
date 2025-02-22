@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal Pairs Pronunciation Trainer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f8f8f8;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 60%;
+            margin: auto;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #feedback {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .correct {
+            color: green;
+        }
+
+        .incorrect {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Minimal Pairs Pronunciation Trainer</h1>
+        <p id="word-pair">Click "Next Pair" to start.</p>
+        <button id="start-btn">🎤 Start Speaking</button>
+        <button id="next-btn">➡️ Next Pair</button>
+        <p id="feedback"></p>
+    </div>
+    
+    <script>
+        const minimalPairs = [
+            ["bit", "bet"], ["ship", "sheep"], ["cat", "cut"], ["pin", "pen"],
+            ["sit", "set"], ["pat", "pet"], ["fit", "feet"], ["bag", "beg"],
+            ["hat", "hot"], ["cot", "caught"], ["lid", "lead"], ["duck", "dock"],
+            ["fan", "fun"], ["cup", "cop"], ["cap", "cup"], ["dip", "deep"],
+            ["sip", "zip"], ["seat", "sheet"], ["chew", "shoe"], ["cart", "court"]
+        ];
+
+        let currentPair = 0;
+        document.getElementById("next-btn").addEventListener("click", () => {
+            currentPair = (currentPair + 1) % minimalPairs.length;
+            document.getElementById("word-pair").textContent = `Say either: "${minimalPairs[currentPair][0]}" or "${minimalPairs[currentPair][1]}"`;
+            document.getElementById("feedback").textContent = "";
+        });
+
+        document.getElementById("start-btn").addEventListener("click", startSpeaking);
+
+        function startSpeaking() {
+            const expectedWords = minimalPairs[currentPair];
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = "en-US";
+            recognition.continuous = false;
+            recognition.interimResults = false;
+
+            recognition.onresult = (event) => {
+                const spokenWord = event.results[0][0].transcript.toLowerCase().trim();
+                displayFeedback(spokenWord, expectedWords);
+            };
+
+            recognition.onerror = (event) => {
+                document.getElementById("feedback").textContent = "Error: " + event.error;
+                document.getElementById("feedback").className = "incorrect";
+            };
+
+            recognition.start();
+        }
+
+        function displayFeedback(spoken, expected) {
+            const feedback = document.getElementById("feedback");
+            if (expected.includes(spoken)) {
+                feedback.textContent = `✅ Correct! You said "${spoken}"`;
+                feedback.className = "correct";
+            } else {
+                feedback.textContent = `❌ Incorrect. Try again! You said "${spoken}"`;
+                feedback.className = "incorrect";
+            }
+        }
+    </script>
+</body>
+</html>
